@@ -13,26 +13,26 @@ path = "src/bin/client.rs"
 
 [dependencies]
 # Core async and gRPC stack
-tokio = { version = "1.28", features = ["macros", "rt-multi-thread"] }
-tonic = { version = "0.9", features = ["transport"] }
-prost = "0.11"
+tonic = {version = "0.12", features = ["transport"]}
+tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
+prost = "0.13"
 
 # Observability
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+tracing-subscriber = {version = "0.3.19", features = ["env-filter", "fmt", "json", "std"]}
+tracing = "0.1.41"
 
 # Middleware and tower ecosystem
-tower = "0.5"                         # For retries, rate-limiting, timeouts, etc.
-tower-http = { version = "0.4", features = ["trace", "timeout", "compression", "auth"] } # optional
+tower = "0.5.2"     # For retries, rate-limiting, timeouts, etc.
+tower-http = {version = "0.6.6", features = ["full"]}
 
-# Configuration management
+# Configuration Management
 serde = { version = "1.0", features = ["derive"] }
-config = "0.15"
-dotenvy = "0.15"
+config = "0.15.13"
+dotenvy = "0.15.7"
 
-# Error handling
-thiserror = "1.0"
-anyhow = "1.0"
+# Error Handling
+anyhow = "1.0.98"
+thiserror = "2.0.12"
 
 [build-dependencies]
-tonic-build = "0.9"
+tonic-build = "0.12"
