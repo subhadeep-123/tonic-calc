@@ -21,6 +21,8 @@ impl CalculatorServiceImpl {
 #[tonic::async_trait]
 impl Calculator for CalculatorServiceImpl {
     async fn add(&self, request: Request<AddRequest>) -> Result<Response<AddResponse>, Status> {
+        let _ = &self.state;
+
         let req = request.into_inner();
         let result = req.a + req.b;
 
