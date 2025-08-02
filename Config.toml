@@ -1,0 +1,10 @@
+[server]
+address = "127.0.0.1:50051"
+timeout_secs = 5
+max_requests_per_sec = 100
+
+[auth]
+enable_auth = true
+
+[observability]
+enable_tracing = true
