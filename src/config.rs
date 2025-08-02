@@ -1,6 +1,5 @@
 use dotenvy::dotenv;
 use serde::Deserialize;
-use std::env;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Settings {
