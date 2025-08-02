@@ -1,0 +1,18 @@
+use tonic_micro::{config::load, server::start_server};
+use tracing::info;
+use tracing_subscriber::EnvFilter;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Load config
+    let settings = load()?;
+
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
+
+    info!("Server Starting On - {}", settings.server.address);
+    start_server(settings).await?;
+
+    Ok(())
+}
