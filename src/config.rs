@@ -1,4 +1,3 @@
-use dotenvy::dotenv;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Clone)]
@@ -20,7 +19,6 @@ pub struct AuthConfig {
     #[serde(default)]
     pub enable_auth: bool,
 
-    // Will come from .env or environment variable
     #[serde(default)]
     pub auth_token: String,
 }
@@ -33,13 +31,14 @@ pub struct ObservabilityConfig {
 
 pub fn load() -> Result<Settings, config::ConfigError> {
     // Load from .env file first
-    let _ = dotenv();
+    let _ = dotenvy::dotenv();
 
-    // Build the config with priority: .env > ENV > Config.toml
+    // Load from Config.toml and environment variables with "APP__" prefix
     let builder = config::Config::builder()
         .add_source(config::File::with_name("Config").required(false)) // load Config.toml
         .add_source(config::Environment::with_prefix("APP").separator("__")); // load env variables
 
     let config = builder.build()?;
+
     config.try_deserialize()
 }
