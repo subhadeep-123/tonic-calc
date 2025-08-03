@@ -1,11 +1,12 @@
 use tonic::transport::Server;
 use tonic_health::server::health_reporter;
+use tower::ServiceBuilder;
 use tracing::{error, info};
 
 use crate::{
     config::Settings,
     generated::service::calculator_server::CalculatorServer,
-    // middleware,
+    middleware::build_middleware_stack,
     server::{
         handler::CalculatorServiceImpl, health::monitor_health, signal::setup_shutdown_handler,
         state::AppState,
@@ -24,7 +25,11 @@ pub async fn start_server(settings: Settings) -> Result<(), Box<dyn std::error::
     let state = AppState::new(settings.clone());
 
     let svc = CalculatorServiceImpl::new(state.clone());
-    // let middleware = build_middleware_stack();
+    let middleware = build_middleware_stack();
+
+    let wrapped_svc = ServiceBuilder::new()
+        .layer(middleware)
+        .service(CalculatorServer::new(svc));
 
     // Health Check Service
     let (health_reporter, health_service) = health_reporter();
@@ -33,9 +38,8 @@ pub async fn start_server(settings: Settings) -> Result<(), Box<dyn std::error::
     let shutdown = setup_shutdown_handler();
 
     let server = Server::builder()
-        // .layer(middleware)
         .add_service(health_service)
-        .add_service(CalculatorServer::new(svc))
+        .add_service(wrapped_svc)
         .serve_with_shutdown(addr, async {
             let _ = shutdown.receiver.await;
             info!("Initiating graceful shutdown...");
