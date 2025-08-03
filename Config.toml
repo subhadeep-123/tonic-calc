@@ -3,8 +3,9 @@ address = "127.0.0.1:50051"
 timeout_secs = 5
 max_requests_per_sec = 100
 
-[auth]
+[AUTH]
 enable_auth = true
+AUTH_TOKEN = ""
 
 [observability]
 enable_tracing = true
