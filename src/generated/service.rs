@@ -30,10 +30,10 @@ pub mod calculator_client {
         dead_code,
         missing_docs,
         clippy::wildcard_imports,
-        clippy::let_unit_value
+        clippy::let_unit_value,
     )]
-    use tonic::codegen::http::Uri;
     use tonic::codegen::*;
+    use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
     pub struct CalculatorClient<T> {
         inner: tonic::client::Grpc<T>,
@@ -77,8 +77,9 @@ pub mod calculator_client {
                     <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
                 >,
             >,
-            <T as tonic::codegen::Service<http::Request<tonic::body::BoxBody>>>::Error:
-                Into<StdError> + std::marker::Send + std::marker::Sync,
+            <T as tonic::codegen::Service<
+                http::Request<tonic::body::BoxBody>,
+            >>::Error: Into<StdError> + std::marker::Send + std::marker::Sync,
         {
             CalculatorClient::new(InterceptedService::new(inner, interceptor))
         }
@@ -117,25 +118,39 @@ pub mod calculator_client {
             &mut self,
             request: impl tonic::IntoRequest<super::AddRequest>,
         ) -> std::result::Result<tonic::Response<super::AddResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
-            })?;
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/service.Calculator/Add");
             let mut req = request.into_request();
-            req.extensions_mut()
-                .insert(GrpcMethod::new("service.Calculator", "Add"));
+            req.extensions_mut().insert(GrpcMethod::new("service.Calculator", "Add"));
             self.inner.unary(req, path, codec).await
         }
         pub async fn subtract(
             &mut self,
             request: impl tonic::IntoRequest<super::SubtractRequest>,
-        ) -> std::result::Result<tonic::Response<super::SubtractResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
-            })?;
+        ) -> std::result::Result<
+            tonic::Response<super::SubtractResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/service.Calculator/Subtract");
+            let path = http::uri::PathAndQuery::from_static(
+                "/service.Calculator/Subtract",
+            );
             let mut req = request.into_request();
             req.extensions_mut()
                 .insert(GrpcMethod::new("service.Calculator", "Subtract"));
@@ -150,7 +165,7 @@ pub mod calculator_server {
         dead_code,
         missing_docs,
         clippy::wildcard_imports,
-        clippy::let_unit_value
+        clippy::let_unit_value,
     )]
     use tonic::codegen::*;
     /// Generated trait containing gRPC methods that should be implemented for use with CalculatorServer.
@@ -163,7 +178,10 @@ pub mod calculator_server {
         async fn subtract(
             &self,
             request: tonic::Request<super::SubtractRequest>,
-        ) -> std::result::Result<tonic::Response<super::SubtractResponse>, tonic::Status>;
+        ) -> std::result::Result<
+            tonic::Response<super::SubtractResponse>,
+            tonic::Status,
+        >;
     }
     #[derive(Debug)]
     pub struct CalculatorServer<T> {
@@ -186,7 +204,10 @@ pub mod calculator_server {
                 max_encoding_message_size: None,
             }
         }
-        pub fn with_interceptor<F>(inner: T, interceptor: F) -> InterceptedService<Self, F>
+        pub fn with_interceptor<F>(
+            inner: T,
+            interceptor: F,
+        ) -> InterceptedService<Self, F>
         where
             F: tonic::service::Interceptor,
         {
@@ -241,15 +262,21 @@ pub mod calculator_server {
                 "/service.Calculator/Add" => {
                     #[allow(non_camel_case_types)]
                     struct AddSvc<T: Calculator>(pub Arc<T>);
-                    impl<T: Calculator> tonic::server::UnaryService<super::AddRequest> for AddSvc<T> {
+                    impl<T: Calculator> tonic::server::UnaryService<super::AddRequest>
+                    for AddSvc<T> {
                         type Response = super::AddResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
                         fn call(
                             &mut self,
                             request: tonic::Request<super::AddRequest>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
-                            let fut = async move { <T as Calculator>::add(&inner, request).await };
+                            let fut = async move {
+                                <T as Calculator>::add(&inner, request).await
+                            };
                             Box::pin(fut)
                         }
                     }
@@ -278,16 +305,23 @@ pub mod calculator_server {
                 "/service.Calculator/Subtract" => {
                     #[allow(non_camel_case_types)]
                     struct SubtractSvc<T: Calculator>(pub Arc<T>);
-                    impl<T: Calculator> tonic::server::UnaryService<super::SubtractRequest> for SubtractSvc<T> {
+                    impl<
+                        T: Calculator,
+                    > tonic::server::UnaryService<super::SubtractRequest>
+                    for SubtractSvc<T> {
                         type Response = super::SubtractResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
                         fn call(
                             &mut self,
                             request: tonic::Request<super::SubtractRequest>,
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
-                            let fut =
-                                async move { <T as Calculator>::subtract(&inner, request).await };
+                            let fut = async move {
+                                <T as Calculator>::subtract(&inner, request).await
+                            };
                             Box::pin(fut)
                         }
                     }
@@ -313,19 +347,23 @@ pub mod calculator_server {
                     };
                     Box::pin(fut)
                 }
-                _ => Box::pin(async move {
-                    let mut response = http::Response::new(empty_body());
-                    let headers = response.headers_mut();
-                    headers.insert(
-                        tonic::Status::GRPC_STATUS,
-                        (tonic::Code::Unimplemented as i32).into(),
-                    );
-                    headers.insert(
-                        http::header::CONTENT_TYPE,
-                        tonic::metadata::GRPC_CONTENT_TYPE,
-                    );
-                    Ok(response)
-                }),
+                _ => {
+                    Box::pin(async move {
+                        let mut response = http::Response::new(empty_body());
+                        let headers = response.headers_mut();
+                        headers
+                            .insert(
+                                tonic::Status::GRPC_STATUS,
+                                (tonic::Code::Unimplemented as i32).into(),
+                            );
+                        headers
+                            .insert(
+                                http::header::CONTENT_TYPE,
+                                tonic::metadata::GRPC_CONTENT_TYPE,
+                            );
+                        Ok(response)
+                    })
+                }
             }
         }
     }
