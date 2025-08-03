@@ -14,7 +14,7 @@ path = "src/bin/client.rs"
 [dependencies]
 # Core async and gRPC stack
 tonic = {version = "0.12", features = ["transport"]}
-tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.28.0", features = ["macros", "rt-multi-thread", "signal"] }
 tonic-health = "0.12"
 prost = "0.13"
 
