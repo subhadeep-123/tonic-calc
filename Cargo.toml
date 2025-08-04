@@ -34,6 +34,7 @@ dotenvy = "0.15"
 # Error Handling
 anyhow = "1.0.98"
 thiserror = "2.0.12"
+futures = "0.3.31"
 
 [build-dependencies]
 tonic-build = "0.12"

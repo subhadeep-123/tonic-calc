@@ -1,3 +1,5 @@
+use futures::Future;
+use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Instant;
 use tonic::{Request, Status};
@@ -12,13 +14,15 @@ pub struct LoggingMiddleware<S> {
 
 impl<S, ReqBody> Service<Request<ReqBody>> for LoggingMiddleware<S>
 where
-    S: Service<Request<ReqBody>, Response = tonic::Response<tonic::body::BoxBody>, Error = Status>,
+    S: Service<Request<ReqBody>, Response = tonic::Response<tonic::body::BoxBody>, Error = Status>
+        + Send
+        + 'static,
     S::Future: Send + 'static,
     ReqBody: std::fmt::Debug + Send + Sync + 'static,
 {
     type Response = S::Response;
     type Error = S::Error;
-    type Future = S::Future;
+    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
     fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         self.inner.poll_ready(cx)
@@ -31,19 +35,27 @@ where
             .get(":path")
             .and_then(|v| v.to_str().ok())
             .map(|s| s.to_string())
-            .unwrap_or("<unknown>".to_string());
+            .unwrap_or_else(|| "<unknown>".to_string());
 
         let start = Instant::now();
         info!("Incoming gRPC call: {}", method_path);
 
         let fut = self.inner.call(req);
 
-        tokio::spawn(async move {
+        Box::pin(async move {
+            let res = fut.await;
             let elapsed = start.elapsed();
-            info!("Completed gRPC call {} in {:?}", method_path, elapsed);
-        });
 
-        fut
+            match &res {
+                Ok(_) => info!("Completed gRPC call {} in {:?}", method_path, elapsed),
+                Err(err) => info!(
+                    "Failed gRPC call {} in {:?} with error: {}",
+                    method_path, elapsed, err
+                ),
+            }
+
+            res
+        })
     }
 }
 
