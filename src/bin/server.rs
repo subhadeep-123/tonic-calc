@@ -14,7 +14,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
-    info!("Server Starting On - {}", settings.server.address);
     start_server(settings).await?;
 
     Ok(())
