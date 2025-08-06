@@ -6,13 +6,14 @@ use crate::{
     config::Settings,
     generated::service::calculator_server::CalculatorServer,
     server::{
-        handler::CalculatorServiceImpl, health::monitor_health, signal::setup_shutdown_handler,
-        state::AppState,
+        handler::CalculatorServiceImpl, health::monitor_health, interceptor::AuthInterceptor,
+        signal::setup_shutdown_handler, state::AppState,
     },
 };
 
 pub mod handler;
 pub mod health;
+pub mod interceptor;
 pub mod signal;
 pub mod state;
 
@@ -31,9 +32,12 @@ pub async fn start_server(settings: Settings) -> Result<(), Box<dyn std::error::
     // Handle graceful shutdown
     let shutdown = setup_shutdown_handler();
 
+    // Interceptor Config
+    let interceptor = AuthInterceptor::new(&settings.auth.auth_token);
+
     let server = Server::builder()
         .add_service(health_service)
-        .add_service(CalculatorServer::new(svc))
+        .add_service(CalculatorServer::with_interceptor(svc, interceptor))
         .serve_with_shutdown(addr, async {
             let _ = shutdown.receiver.await;
             info!("Initiating graceful shutdown...");
