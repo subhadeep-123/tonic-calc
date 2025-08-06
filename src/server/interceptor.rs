@@ -6,12 +6,12 @@ use tonic::{
 use tracing::{debug, warn};
 
 #[derive(Clone)]
-pub struct AuthInterceptor {
+pub struct AuthValidator {
     token: MetadataValue<Ascii>,
 }
 
-impl AuthInterceptor {
-    // Create new AuthInterceptor with a bearer token
+impl AuthValidator {
+    // Create new AuthValidator with a bearer token
     pub fn new(secret: &str) -> Result<Self, tonic::Status> {
         Ok(Self {
             token: format!("Bearer {}", secret)
@@ -21,7 +21,7 @@ impl AuthInterceptor {
     }
 }
 
-impl Interceptor for AuthInterceptor {
+impl Interceptor for AuthValidator {
     fn call(&mut self, req: Request<()>) -> Result<Request<()>, Status> {
         match req.metadata().get("authorization") {
             Some(t) if &self.token == t => {

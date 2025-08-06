@@ -5,15 +5,15 @@ use tracing::{error, info};
 use crate::{
     config::Settings,
     generated::service::calculator_server::CalculatorServer,
-    interceptor::AuthInterceptor,
     server::{
-        handler::CalculatorServiceImpl, health::monitor_health, signal::setup_shutdown_handler,
-        state::AppState,
+        handler::CalculatorServiceImpl, health::monitor_health, interceptor::AuthValidator,
+        signal::setup_shutdown_handler, state::AppState,
     },
 };
 
 pub mod handler;
 pub mod health;
+pub mod interceptor;
 pub mod signal;
 pub mod state;
 
@@ -33,7 +33,7 @@ pub async fn start_server(settings: Settings) -> Result<(), Box<dyn std::error::
     let shutdown = setup_shutdown_handler();
 
     // Interceptor Config
-    let interceptor = AuthInterceptor::new(&settings.auth.auth_token)?;
+    let interceptor = AuthValidator::new(&settings.auth.auth_token)?;
 
     let server = Server::builder()
         .add_service(health_service)
