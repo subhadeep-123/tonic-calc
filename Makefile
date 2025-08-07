@@ -1,36 +1,36 @@
-CERTS_DIR=certs
-KEY_FILE=$(CERTS_DIR)/server.key
-CERT_FILE=$(CERTS_DIR)/server.crt
+CERTS_DIR=tls
 CA_KEY=$(CERTS_DIR)/ca.key
 CA_CERT=$(CERTS_DIR)/ca.crt
+SERVER_KEY=$(CERTS_DIR)/server.key
+SERVER_CSR=$(CERTS_DIR)/server.csr
+SERVER_CERT=$(CERTS_DIR)/server.crt
 
-.PHONY: all certs clean run-server run-client
-
-all: certs
+.PHONY: certs clean server client
 
 certs:
-	@echo "Generating SSL certificates..."
+	@echo "🔐 Generating TLS certificates..."
 	@mkdir -p $(CERTS_DIR)
-	# 1. Generate root CA
+
+	# 1. Generate Root CA Key and Cert
 	openssl genrsa -out $(CA_KEY) 4096
 	openssl req -x509 -new -nodes -key $(CA_KEY) -sha256 -days 3650 -out $(CA_CERT) -subj "/CN=MyCA"
 
-	# 2. Generate server cert/key
-	# Generate server key and CSR
-	openssl genrsa -out $(KEY_FILE) 4096
-	openssl req -new -key $(KEY_FILE) -out $(CERTS_DIR)/server.csr -subj "/CN=localhost"
-	
-	# 3. Sign server cert with CA
-	openssl x509 -req -in $(CERTS_DIR)/server.csr -CA $(CA_CERT) -CAkey $(CA_KEY) -CAcreateserial -out $(CERT_FILE) -days 365 -sha256
-	@echo "✅ TLS certificates generated in $(CERTS_DIR)"@echo "✅ SSL certificates generated in ssl/ directory"
-	
+	# 2. Generate Server Key and CSR
+	openssl genrsa -out $(SERVER_KEY) 4096
+	openssl req -new -key $(SERVER_KEY) -out $(SERVER_CSR) -subj "/CN=localhost"
 
-server:
-	cargo run --bin server
+	# 3. Create server cert signed by CA
+	openssl x509 -req -in $(SERVER_CSR) -CA $(CA_CERT) -CAkey $(CA_KEY) -CAcreateserial \
+	-out $(SERVER_CERT) -days 365 -sha256
 
-client:
-	cargo run --bin client
+	@echo "✅ Certificates created in $(CERTS_DIR)"
 
 clean:
 	rm -rf $(CERTS_DIR)
 	cargo clean
+
+server:
+	RUST_LOG=info cargo run --bin server
+
+client:
+	RUST_LOG=info cargo run --bin client
