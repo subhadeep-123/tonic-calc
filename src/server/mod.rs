@@ -1,4 +1,8 @@
+use std::{error, fs, path};
+
+use tonic::transport::Identity;
 use tonic::transport::Server;
+use tonic::transport::ServerTlsConfig;
 use tonic_health::server::health_reporter;
 use tracing::{error, info};
 
@@ -16,6 +20,18 @@ pub mod health;
 pub mod interceptor;
 pub mod signal;
 pub mod state;
+
+async fn tls_identity(tls_path: String) -> Result<Identity, Box<dyn error::Error>> {
+    let data_dir = path::PathBuf::from_iter([std::env!("CARGO_MANIFEST_DIR"), &tls_path]);
+
+    let cert = fs::read_to_string(data_dir.join("server.crt"))?;
+
+    let key = fs::read_to_string(data_dir.join("server.key"))?;
+
+    let identity = Identity::from_pem(cert, key);
+
+    Ok(identity)
+}
 
 pub async fn start_server(settings: Settings) -> Result<(), Box<dyn std::error::Error>> {
     let addr = settings.server.address.parse()?;
@@ -35,7 +51,11 @@ pub async fn start_server(settings: Settings) -> Result<(), Box<dyn std::error::
     // Interceptor Config
     let interceptor = AuthValidator::new(&settings.auth.auth_token)?;
 
+    // TLS Identity
+    let identity = tls_identity(String::from("tls")).await?;
+
     let server = Server::builder()
+        .tls_config(ServerTlsConfig::new().identity(identity))?
         .add_service(health_service)
         .add_service(CalculatorServer::with_interceptor(svc, interceptor))
         .serve_with_shutdown(addr, async {

@@ -24,6 +24,11 @@ pub struct AuthConfig {
 }
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct TlsConfig {
+    pub certs_dir: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct ObservabilityConfig {
     #[serde(default)]
     pub enable_tracing: bool,
