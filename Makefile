@@ -1,30 +1,36 @@
-.PHONY: certs server client
+CERTS_DIR=certs
+KEY_FILE=$(CERTS_DIR)/server.key
+CERT_FILE=$(CERTS_DIR)/server.crt
+CA_KEY=$(CERTS_DIR)/ca.key
+CA_CERT=$(CERTS_DIR)/ca.crt
 
-# Generate SSL certificates
+.PHONY: all certs clean run-server run-client
+
+all: certs
+
 certs:
 	@echo "Generating SSL certificates..."
-	@mkdir -p ssl
+	@mkdir -p $(CERTS_DIR)
 	# 1. Generate root CA
-	openssl genrsa -out ssl/ca.key 4096
-	openssl req -x509 -new -nodes -key ssl/ca.key -sha256 -days 365 -out ssl/ca.crt -subj "/CN=RootCA"
+	openssl genrsa -out $(CA_KEY) 4096
+	openssl req -x509 -new -nodes -key $(CA_KEY) -sha256 -days 3650 -out $(CA_CERT) -subj "/CN=MyCA"
 
 	# 2. Generate server cert/key
-	openssl genrsa -out ssl/server.key 2048
-	openssl req -new -key ssl/server.key -out ssl/server.csr -subj "/CN=localhost"
-	openssl x509 -req -in ssl/server.csr -CA ssl/ca.crt -CAkey ssl/ca.key -CAcreateserial -out ssl/server.crt -days 365 -sha256
+	# Generate server key and CSR
+	openssl genrsa -out $(KEY_FILE) 4096
+	openssl req -new -key $(KEY_FILE) -out $(CERTS_DIR)/server.csr -subj "/CN=localhost"
+	
+	# 3. Sign server cert with CA
+	openssl x509 -req -in $(CERTS_DIR)/server.csr -CA $(CA_CERT) -CAkey $(CA_KEY) -CAcreateserial -out $(CERT_FILE) -days 365 -sha256
+	@echo "✅ TLS certificates generated in $(CERTS_DIR)"@echo "✅ SSL certificates generated in ssl/ directory"
+	
 
-	# 3. Generate client cert/key
-	openssl genrsa -out ssl/client.key 2048
-	openssl req -new -key ssl/client.key -out ssl/client.csr -subj "/CN=client"
-	openssl x509 -req -in ssl/client.csr -CA ssl/ca.crt -CAkey ssl/ca.key -CAcreateserial -out ssl/client.crt -days 365 -sha256
-	@echo "✅ SSL certificates generated in ssl/ directory"
-
-# Run the server
 server:
-	@echo "Starting gRPC server..."
 	cargo run --bin server
 
-# Run the client
 client:
-	@echo "Starting gRPC client..."
 	cargo run --bin client
+
+clean:
+	rm -rf $(CERTS_DIR)
+	cargo clean
