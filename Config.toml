@@ -7,8 +7,9 @@ max_requests_per_sec = 100
 enable_auth = true
 AUTH_TOKEN = ""
 
-[TLS]
-certs_dir = "ssl"
+[tls]
+path = "tls"
+domain_name = "localhost"
 
 [observability]
 enable_tracing = true

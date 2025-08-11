@@ -5,6 +5,7 @@ pub struct Settings {
     pub server: ServerConfig,
     pub auth: AuthConfig,
     pub observability: ObservabilityConfig,
+    pub tls: TlsConfig,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -25,7 +26,8 @@ pub struct AuthConfig {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct TlsConfig {
-    pub certs_dir: String,
+    pub path: String,
+    pub domain_name: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]
