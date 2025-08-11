@@ -52,7 +52,7 @@ pub async fn start_server(settings: Settings) -> Result<(), Box<dyn std::error::
     let interceptor = AuthValidator::new(&settings.auth.auth_token)?;
 
     // TLS Identity
-    let identity = tls_identity(String::from("tls")).await?;
+    let identity = tls_identity(String::from(&settings.tls.path)).await?;
 
     let server = Server::builder()
         .tls_config(ServerTlsConfig::new().identity(identity))?
