@@ -1,1 +1,4 @@
 /target
+.env
+tls/*
+!tls/openssl.cnf
