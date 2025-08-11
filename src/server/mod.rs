@@ -35,7 +35,12 @@ async fn tls_identity(tls_path: String) -> Result<Identity, Box<dyn error::Error
 }
 
 pub async fn start_server(settings: Settings) -> Result<(), Box<dyn std::error::Error>> {
-    let addr = settings.server.address.to_socket_addrs()?.next().ok_or("Invalid address")?;
+    let addr = settings
+        .server
+        .address
+        .to_socket_addrs()?
+        .next()
+        .ok_or("Invalid address")?;
     info!("Server Starting on {} with TLS Encryption", addr);
 
     let state = AppState::new(settings.clone());
