@@ -1,7 +1,10 @@
 [server]
-address = "[::1]:50051"
-timeout_secs = 5
+address = "127.0.0.1:50051"
 max_requests_per_sec = 100
+
+[client]
+address = "127.0.0.1:50051"
+timeout_secs = 5
 
 [AUTH]
 enable_auth = true

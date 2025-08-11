@@ -3,6 +3,7 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize, Clone)]
 pub struct Settings {
     pub server: ServerConfig,
+    pub client: ClientConfig,
     pub auth: AuthConfig,
     pub observability: ObservabilityConfig,
     pub tls: TlsConfig,
@@ -11,8 +12,13 @@ pub struct Settings {
 #[derive(Debug, Deserialize, Clone)]
 pub struct ServerConfig {
     pub address: String,
-    pub timeout_secs: u64,
     pub max_requests_per_sec: u64,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct ClientConfig {
+    pub address: String,
+    pub timeout_secs: u64,
 }
 
 #[derive(Debug, Deserialize, Clone)]
